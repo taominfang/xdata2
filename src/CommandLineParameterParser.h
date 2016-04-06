@@ -58,7 +58,7 @@ public:
 		out << endl;
 		if (this->aliases.size() > 1) {
 			out << "\tAlias:";
-			for (int i1 = 1; i1 < aliases.size(); i1++) {
+			for (size_t i1 = 1; i1 < aliases.size(); i1++) {
 				if (i1 > 1) {
 					out << ", ";
 				}
@@ -142,7 +142,7 @@ public:
 		return *this;
 	}
 
-	bool getValue(string &returnValue, int level = 0, int index = 0) const {
+	bool getValue(string &returnValue, size_t level = 0, size_t index = 0) const {
 		if (values.size() > level && values[level].size() > index) {
 			returnValue = values[level][index];
 			return true;
