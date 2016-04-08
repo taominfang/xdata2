@@ -116,6 +116,7 @@ void example2() {
 }
 
 
+
 void example3() {
 	cout << "Example3 set default value and multiple values" << endl;
 
@@ -157,7 +158,7 @@ void example3() {
 
 
 
-int main(int argc, char **argv) {
+int __main(int argc, char **argv) {
 
 	example1();
 
