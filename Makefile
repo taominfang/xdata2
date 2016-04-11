@@ -9,21 +9,23 @@ prejob:
 
 	
 ${TARGET_DIR}/%.o: src/%.cpp
-	$(CXX) -c $(CXXFLAGS)  -o $@ $<
+	$(CXX) -c $(CXXFLAGS) -I C:/boost/boost_1_60_0  -o $@ $<
 	
 ${TARGET_DIR}/%${OS_EXE_EXT}: ${TARGET_DIR}/%.o ${TARGET_DIR}/main.o 
 	$(CXX) $(LINKFLAGS)  -o $@ $<  ${TARGET_DIR}/main.o $(LIBS)
 
-LIBS = -l boost_regex
+LIBS = ${BOOST_LIBS} -l boost_regex 
 
 
-${TARGET_DIR}/utest_boost${OS_EXE_EXT}:${TARGET_DIR}/utest_boost.o
-	$(CXX) $(LINKFLAGS)  -o $@ $< $(LIBS)
+TEST_OBJECTS=${TARGET_DIR}/UnitTestBase.o ${TARGET_DIR}/RegAwk.o 
+
+${TARGET_DIR}/UnitFunctionsTest${OS_EXE_EXT}:${TARGET_DIR}/UnitFunctionsTest.o $(TEST_OBJECTS) src/UnitFunctionsTestCases.h
+	$(CXX) $(LINKFLAGS)  -o $@ $< $(TEST_OBJECTS) $(LIBS) 
 
 
 TARGET =${TARGET_DIR}/CommandLineParameterExample${OS_EXE_EXT} ${TARGET_DIR}/RegAwk${OS_EXE_EXT} ${TARGET_DIR}/BoostRegexTest${OS_EXE_EXT} 
 
-UNIT_TESTS=${TARGET_DIR}/utest_boost${OS_EXE_EXT}
+UNIT_TESTS=${TARGET_DIR}/UnitFunctionsTest${OS_EXE_EXT}
 
 _all:prejob	$(TARGET)
 

@@ -10,7 +10,9 @@
 
 using namespace std;
 
-bool findIndex(string & data, const boost::match_results<string::iterator>& what, int ind, int & start, int & end) {
+bool findIndex(string & data,
+		const boost::match_results<string::iterator>& what, size_t ind,
+		int & start, int & end) {
 
 	if (ind >= what.size()) {
 		return false;
@@ -54,31 +56,40 @@ int __main(int argc, char **argv) {
 	string text;
 	getline(cin, text);
 
-	boost::regex expression(regex.c_str());
+	try {
+		boost::regex expression(regex.c_str());
 
-	boost::regex_iterator<string::iterator> m1(text.begin(), text.end(), expression);
-	boost::regex_iterator<string::iterator> stop;
+		boost::regex_iterator<string::iterator> m1(text.begin(), text.end(),
+				expression);
+		boost::regex_iterator<string::iterator> stop;
 
-	for (int i1 = 1; m1 != stop; m1++, i1++) {
+		for (int i1 = 1; m1 != stop; m1++, i1++) {
 
-		const boost::match_results<string::iterator>& what = *m1;
-		cout << i1 << ", find, size:" << what.size() - 1 << endl;
-		cout << "Full string:" << what[0].str() << endl;
+			const boost::match_results<string::iterator>& what = *m1;
+			cout << i1 << ", find, size:" << what.size() - 1 << endl;
+			cout << "Full string:" << what[0].str() << endl;
 
-		for (int i2 = 1; i2 < what.size(); i2++) {
+			for (size_t i2 = 1; i2 < what.size(); i2++) {
 
-			int start = -1, end = -1;
+				int start = -1, end = -1;
 
-			if (findIndex(text, what, i2, start, end)) {
-				cout << "\t" << i2 << ":" << what[i2].str() << ", index from: " << start << " until:" << end << endl;
-			} else {
-				cout << "\t" << i2 << ":" << what[i2].str() << ", but index range of it!" << endl;
+				if (findIndex(text, what, i2, start, end)) {
+					cout << "\t" << i2 << ":" << what[i2].str()
+							<< ", index from: " << start << " until:" << end
+							<< endl;
+				} else {
+					cout << "\t" << i2 << ":" << what[i2].str()
+							<< ", but index range of it!" << endl;
+				}
+
+				//
+
 			}
-
-			//
 
 		}
 
+	} catch (boost::regex_error e) {
+		cerr<<e.what()<<endl;
 	}
 
 	return 0;

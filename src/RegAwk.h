@@ -7,6 +7,8 @@
 
 #ifndef REGAWK_H_
 #define REGAWK_H_
+#include <vector>
+#include <boost/regex.hpp>
 #include "CommandLineParameterParser.h"
 using namespace openfly;
 class RegAwk {
@@ -16,8 +18,12 @@ public:
 
 	int run(int argc, char ** argv);
 
+
+	int regexSplit(boost::regex & expression,string & input, vector<string> &result);
+
 protected:
-	CommandLineParameterParser * command_line_parameters;
+	boost::regex regex;
+	list<string> input_files;
 };
 
 #endif /* REGAWK_H_ */
