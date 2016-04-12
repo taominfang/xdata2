@@ -12,7 +12,7 @@ UnitFunctionsTest::UnitFunctionsTest(int argc, char **argv) {
 	required_cases.clear();
 	if (argc < 2) {
 
-		cout<<"No special test case , test all!"<<endl;
+		cout << "No special test case , test all!" << endl;
 		for (map<string, UnitTestBase *>::iterator i1 = test_cases.begin();
 				i1 != test_cases.end(); i1++) {
 			required_cases.push_back(i1->second);
@@ -36,7 +36,6 @@ UnitFunctionsTest::~UnitFunctionsTest() {
 	}
 }
 
-
 int main(int argc, char **argv) {
 
 	UnitFunctionsTest t(argc, argv);
@@ -51,19 +50,24 @@ void UnitFunctionsTest::test() {
 
 	for (list<UnitTestBase *>::iterator i1 = required_cases.begin();
 			i1 != required_cases.end(); i1++) {
-		cout<<(*i1)->getName()<<"................ ";
-		if((*i1)->test()){
-			cout<<"Pass"<<endl;
+		cout << (*i1)->getName() << "................ ";
+		try {
+			if ((*i1)->test()) {
+				cout << "Pass" << endl;
+			} else {
+				cout << "Fault" << endl;
+				(*i1)->printErrors();
+			}
+		} catch (...) {
+			cout << "Exception" << endl;
 		}
-		else{
-			cout<<"Fault"<<endl;
-			(*i1)->printErrors();
-		}
+
 	}
 }
 
 void UnitFunctionsTest::initAllCalse() {
 	test_cases["regexSplitTest"] = new TestRegexSplit();
+	test_cases["TestStringVariableParser"] = new TestStringVariableParser();
 
 	for (map<string, UnitTestBase *>::iterator i1 = test_cases.begin();
 			i1 != test_cases.end(); i1++) {
