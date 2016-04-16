@@ -1,0 +1,22 @@
+A bulde of command line tools.
+
+
+
+1. CommandLineParameterExample, just demo how to use command line parameter parser.
+
+2. RegAwk, like awk command, but support regular expression
+   usage: RegAwk [-F regex] [-P output_pattern] [input_file1] [input_file2...] [input_file_n]
+
+
+	2.1 -F , the spliter, regular expression format. The default spliter is '[ \t]' 
+    2.2 -P , the output string, with the variables (column index, 0 based). The default is '${0}'
+    2.3 input_files, all parameters which are not belong to -F and -P will be considered as file names, if there is not a file name, stdin will be used as the input.
+    
+    2.4 For example:
+    line: abbcdefgadd
+    spliter is:a
+    output pattern is "firstColumn${0},secondColumn${1}"
+    output:"firstColumn,secondColumnbbcdefg"
+
+
+
