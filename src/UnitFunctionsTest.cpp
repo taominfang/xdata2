@@ -1,7 +1,7 @@
 /*
  * UnitFunctionsTest.cpp
  *
- *  Created on: 2016Äê4ÔÂ9ÈÕ
+ *  Created on: 2016ï¿½ï¿½4ï¿½ï¿½9ï¿½ï¿½
  *      Author: minfang
  */
 
@@ -58,7 +58,13 @@ void UnitFunctionsTest::test() {
 				cout << "Fault" << endl;
 				(*i1)->printErrors();
 			}
-		} catch (...) {
+		}
+		catch(std::exception se){
+			cout << "Exception" << endl;
+			cerr <<se.what()<<endl;
+
+		}
+		catch (...) {
 			cout << "Exception" << endl;
 		}
 

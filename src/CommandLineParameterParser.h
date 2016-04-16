@@ -275,8 +275,11 @@ public:
 				} else {
 					i1 += p->putValues(parameters, i1);
 				}
-			} else {
+			} else if(i1!=0){
 				extra_parameters.push_back(parameters[i1++]);
+			}
+			else{
+				i1++;
 			}
 		}
 

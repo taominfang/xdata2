@@ -19,7 +19,10 @@ LIBS = ${BOOST_LIBS} -l boost_regex
 
 TEST_OBJECTS=${TARGET_DIR}/UnitTestBase.o ${TARGET_DIR}/RegAwk.o 
 
-${TARGET_DIR}/UnitFunctionsTest${OS_EXE_EXT}:${TARGET_DIR}/UnitFunctionsTest.o $(TEST_OBJECTS) src/UnitFunctionsTestCases.h
+${TARGET_DIR}/UnitFunctionsTest.o:src/UnitFunctionsTest.cpp src/*.h
+	$(CXX) -c $(CXXFLAGS) -I C:/boost/boost_1_60_0  -o $@ $<
+
+${TARGET_DIR}/UnitFunctionsTest${OS_EXE_EXT}:${TARGET_DIR}/UnitFunctionsTest.o $(TEST_OBJECTS) 
 	$(CXX) $(LINKFLAGS)  -o $@ $< $(TEST_OBJECTS) $(LIBS) 
 
 

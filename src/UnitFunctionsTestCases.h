@@ -1,7 +1,7 @@
 /*
  * UnitFunctionsTestCases.h
  *
- *  Created on: 2016Äê4ÔÂ9ÈÕ
+ *  Created on: 2016ï¿½ï¿½4ï¿½ï¿½9ï¿½ï¿½
  *      Author: minfang
  */
 
@@ -12,7 +12,6 @@
 #include "RegAwk.h"
 
 #include "VariablePatternParser.h"
-
 
 class TestRegexSplit: public UnitTestBase {
 
@@ -39,29 +38,40 @@ public:
 	}
 };
 
-class TestStringVariableParser : public UnitTestBase {
+class TestStringVariableParser: public UnitTestBase {
 
 public:
 	virtual bool test() {
-		const char * s="a${b}${1}${2}${c}\\$c";
-		map<string,string> vm;
-		vm["b"]="bb";
-		vm["2"]="22";
+		const char * s = "a${b}${1}${2}${c}\\$c";
+		map<string, string> vm;
+		vm["b"] = "bb";
+		vm["2"] = "22";
 		vector<string> rs;
 		rs.push_back("000");
 		rs.push_back("1111");
 
-		vector<StringValue> rr;
-		std::ostringstream  errorMessage;
-		int size=VariablePatternParser::parse(s,rr,errorMessage);
-		if(size<=0){
-			cerr<<errorMessage.str()<<endl;
+		VariableProcessor rr;
+		std::ostringstream errorMessage;
+		int size = VariablePatternParser::parse(s, rr, errorMessage);
+		if (size <= 0) {
+			cerr << errorMessage.str() << endl;
 			return false;
 		}
-		std::ostringstream  result;
-		VariablePatternParser::contruct(&rs,&vm,rr,result);
-		cout<<result.str()<<endl;
-		return true;
+
+
+
+
+		std::ostringstream result;
+
+		rr.contruct(&rs, &vm,true, result);
+
+		if(result.str()==string("abb111122${c}$c")){
+			return true;
+		}
+		else{
+			return false;
+		}
+
 	}
 };
 #endif /* UNITFUNCTIONSTESTCASES_H_ */

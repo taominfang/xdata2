@@ -1,7 +1,7 @@
 /*
  * VariablePatternParser.h
  *
- *  Created on: 2016Äê4ÔÂ11ÈÕ
+ *  Created on: 2016ï¿½ï¿½4ï¿½ï¿½11ï¿½ï¿½
  *      Author: minfang
  */
 
@@ -12,26 +12,38 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <sstream>
 using namespace std;
-using namespace openfly;
+
 namespace openfly {
+
+enum {
+	TYPE_STRING, TYPE_VARIABLE
+};
 
 class StringValue {
 
 public:
 	StringValue(const char * v) :
-			value(v) {
+			value(v), type(TYPE_STRING) {
 
 	}
 	virtual ~StringValue() {
 
 	}
-	virtual string & getString(vector<string> * regexResult,
-			map<string, string>* variableMap) {
+	virtual string & getString(vector<string> * regexResult, map<string, string>* variableMap,bool keepUnfoundVariable) {
+
+		return value;
+	}
+	int getType() {
+		return type;
+	}
+	string & getValue() {
 		return value;
 	}
 protected:
 	string value;
+	int type;
 
 };
 
@@ -39,8 +51,9 @@ class VariableValue: public StringValue {
 
 public:
 	VariableValue(const char * v) :
-			StringValue(v), regexIndex(-1) {
-		key = value.substr(2, value.size() - 3);
+			StringValue((string("${") + string(v) + string("}")).c_str()), regexIndex(-1) {
+		type = TYPE_VARIABLE;
+		key = v;
 		std::istringstream iss(key);
 		if ((iss >> regexIndex).fail()) {
 			regexIndex = -1;
@@ -50,11 +63,10 @@ public:
 	virtual ~VariableValue() {
 
 	}
-	virtual string & getString(vector<string> * regexResult,
-			map<string, string>* variableMap) {
-		if (regexIndex > -1 && regexResult != NULL
-				&& regexResult->size() >(size_t) regexIndex) {
-			return (*regexResult)[(size_t)regexIndex];
+	virtual string & getString(vector<string> * regexResult, map<string, string>* variableMap,bool keepUnfoundVariable) {
+
+		if (regexIndex > -1 && regexResult != NULL && regexResult->size() > (size_t) regexIndex) {
+			return (*regexResult)[(size_t) regexIndex];
 		} else if (variableMap != NULL) {
 			map<string, string>::iterator f = variableMap->find(key);
 			if (f == variableMap->end()) {
@@ -63,13 +75,57 @@ public:
 				return f->second;
 			}
 		} else {
+			if(keepUnfoundVariable)
 			return value;
+			else{
+				return empty;
+			}
 		}
 	}
+
 protected:
 	int regexIndex;
 	string key;
+	string empty;
 
+};
+
+class VariableProcessor {
+public:
+	VariableProcessor() {
+	}
+	~VariableProcessor() {
+		for (vector<StringValue *>::iterator i1 = handle.begin(); i1 != handle.end(); i1++) {
+			delete *i1;
+		}
+		handle.clear();
+	}
+
+	void add(int type, const char * key) {
+		if (type == TYPE_STRING) {
+			handle.push_back(new StringValue(key));
+		} else if (type == TYPE_VARIABLE) {
+			handle.push_back(new VariableValue(key));
+		}
+	}
+
+	void contruct(vector<string> * regexResult, map<string, string>* variableMap,bool isKeepUnfoundVariable, std::ostream & out) {
+		for (vector<StringValue *>::iterator i1 = handle.begin(); i1 != handle.end(); i1++) {
+			out << (*i1)->getString(regexResult, variableMap,isKeepUnfoundVariable);
+		}
+	}
+	int size() {
+		return handle.size();
+	}
+
+	void debugPrint() {
+		for (int i1 = 0; i1 < handle.size(); i1++) {
+			cout << handle[i1]->getType() << ":" << handle[i1]->getValue() << endl;
+		}
+	}
+
+protected:
+	vector<StringValue *> handle;
 };
 
 enum {
@@ -84,28 +140,24 @@ public:
 
 	}
 
-	void static printStatus(std::ostringstream & out) {
-		out << " NORMAL:" << NORMAL << ", ESCAPE:" << ESCAPE << ", VARIABLE:"
-				<< VARIABLE;
+	void static printStatus(std::ostream & out) {
+		out << " NORMAL:" << NORMAL << ", ESCAPE:" << ESCAPE << ", VARIABLE:" << VARIABLE;
 	}
 
-	void static contruct(vector<string> * regexResult,
-			map<string, string>* variableMap,vector<StringValue> & values,std::ostringstream & out){
-		for(vector<StringValue>::iterator i1=values.begin();i1!=values.end();i1++){
-			out<<i1->getString(regexResult,variableMap);
-		}
-	}
-
-	int static parse(const char * input, vector<StringValue> & result,
-			std::ostringstream & error) {
-		result.clear();
+	int static parse(const char * input, VariableProcessor & result, std::ostream & error) {
 
 		char buff[1024 * 1000];
 		int bIndex = 0;
-		char c;
+
 		int status = NORMAL;
 		int preStatus = NORMAL;
-		while ((c = *input++) != 0) {
+		while (true) {
+			char c = *input;
+			if (c == 0) {
+				break;
+			}
+			input++;
+
 			switch (status) {
 			case NORMAL:
 				if (c == '\\') {
@@ -115,7 +167,10 @@ public:
 					input++;
 					status = VARIABLE;
 					buff[bIndex] = 0;
-					result.push_back(StringValue(buff));
+					if (bIndex > 0) {
+						result.add(TYPE_STRING, buff);
+
+					}
 					bIndex = 0;
 				} else {
 					buff[bIndex++] = c;
@@ -128,11 +183,12 @@ public:
 				break;
 
 			case VARIABLE:
-				if (c == '}' && *input == '$') {
-					input++;
+				if (c == '}') {
+
 					status = NORMAL;
 					buff[bIndex] = 0;
-					result.push_back(VariableValue(buff));
+
+					result.add(TYPE_VARIABLE, buff);
 					bIndex = 0;
 				} else {
 					buff[bIndex++] = c;
@@ -146,11 +202,10 @@ public:
 			}
 		} //end while
 		if (NORMAL != status) {
-			error << "last status should be NORMAL, but it is:"
-					<< status;
+			error << "last status should be NORMAL, but it is:" << status;
 			printStatus(error);
 		} else if (bIndex != 0) {
-			result.push_back(StringValue(buff));
+			result.add(TYPE_STRING, buff);
 
 		}
 		return result.size();
